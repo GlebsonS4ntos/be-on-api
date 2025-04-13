@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { IUserService } from './interfaces/user.service.interface';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { ReadUserDto } from './dtos/readUser.dto';
@@ -17,7 +17,7 @@ export class UsersService implements IUserService {
     ) {}
 
     async findUserByIdAsync(id: number): Promise<ReadUserDto> {
-        const user = await this.userRepository.findOne({where: {id}});
+        const user = await this.userRepository.findOne({where: {id, isDeleted: false}});
 
         if (!user) {
             throw new NotFoundException('User not found');
@@ -31,7 +31,7 @@ export class UsersService implements IUserService {
     }
 
     async findUserByEmailAsync(email: string): Promise<ReadUserDto> {
-        const user = await this.userRepository.findOne({where: {email}});
+        const user = await this.userRepository.findOne({where: {email, isDeleted: false}});
 
         if (!user) {
             throw new NotFoundException('User not found');
@@ -45,6 +45,12 @@ export class UsersService implements IUserService {
     }
 
     async createUserAsync(createUserDto: CreateUserDto): Promise<ReadUserDto> {
+        const userExists = await this.userRepository.findOne({where: {email: createUserDto.email}});
+
+        if (userExists) {
+            throw new BadRequestException('User already exists');
+        }
+
         var passwordHash = await bycrypt.hash(createUserDto.password, 10);
 
         const user = await this.userRepository.create({
@@ -62,7 +68,13 @@ export class UsersService implements IUserService {
         } as ReadUserDto;
     }
     async updateUserAsync(updateUser: UpdateUserDto): Promise<void> {
-        const user = await this.userRepository.findOne({where: {id: updateUser.id}});
+        const userExists = await this.userRepository.findOne({where: {email: updateUser.email}});
+
+        if (userExists) {
+            throw new BadRequestException('User already exists');
+        }
+
+        const user = await this.userRepository.findOne({where: {id: updateUser.id, isDeleted: false}});
 
         if (!user) {
             throw new NotFoundException('User not found');
