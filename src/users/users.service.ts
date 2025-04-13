@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserService } from './interfaces/user.service.interface';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { ReadUserDto } from './dtos/readUser.dto';
@@ -6,7 +6,6 @@ import { UpdateUserDto } from './dtos/updateUser.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { NotFoundError } from 'rxjs';
 import * as bycrypt from 'bcrypt';
 
 @Injectable()
@@ -21,7 +20,7 @@ export class UsersService implements IUserService {
         const user = await this.userRepository.findOne({where: {id}});
 
         if (!user) {
-            throw new NotFoundError('User not found');
+            throw new NotFoundException('User not found');
         }
 
         return {
@@ -35,7 +34,7 @@ export class UsersService implements IUserService {
         const user = await this.userRepository.findOne({where: {email}});
 
         if (!user) {
-            throw new NotFoundError('User not found');
+            throw new NotFoundException('User not found');
         }
         
         return {
@@ -66,7 +65,7 @@ export class UsersService implements IUserService {
         const user = await this.userRepository.findOne({where: {id: updateUser.id}});
 
         if (!user) {
-            throw new NotFoundError('User not found');
+            throw new NotFoundException('User not found');
         }
 
         if (updateUser.password) {
@@ -90,7 +89,7 @@ export class UsersService implements IUserService {
         const user = await this.userRepository.findOne({where: {email}});
 
         if (!user) {
-            throw new NotFoundError('User not found');
+            throw new NotFoundException('User not found');
         }
 
         await this.userRepository.update({email}, {isDeleted: true});                   
