@@ -6,6 +6,9 @@ import { UpdateUserDto } from './dtos/updateUser.dto';
 
 @Injectable()
 export class UsersService implements IUserService {
+    findUserByIdAsync(id: number): Promise<ReadUserDto> {
+        throw new Error('Method not implemented.');
+    }
     findUserByEmailAsync(email: string): Promise<ReadUserDto> {
         throw new Error('Method not implemented.');
     }
